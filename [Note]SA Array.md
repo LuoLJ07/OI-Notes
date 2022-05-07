@@ -1,13 +1,19 @@
-## 核心思想
-倍增+排序（基数排序）
-## Code
+>[OI WIKI](https://oi-wiki.org/string/sa/)
+
+## SA
+### 思想
+
+核心思想挺 friendly 的。\
+倍增+排序（基数排序&计数排序）。\
+时间复杂度 `O(nlogn)`。\
+当然还有 `O(n)` 的毒瘤写法。
+### Code
 `SA[i]:` 表示排名为 `i` 的后缀在原串中的位置\
 `rk[i]:` 表示第 `i` 个后缀的排名
 ```cpp
-char s[N+5];int n; // n=strlen(s+1)
-int m,sa[N+5],rk[N+5],c[256];
+int m,sa[N+5],rk[N+5],c[N+5];
 int x[N+5],y[N+5];
-void getSA() {
+void getSA(const char *s,int n) {
 	m=255;U(i,1,n) ++c[x[i]=s[i]];U(i,1,m) c[i]+=c[i-1];D(i,n,1) sa[c[x[i]]--]=i;
 	for(int k(1);k<=n;k<<=1) {
 		int num(0);
@@ -18,10 +24,11 @@ void getSA() {
 		U(i,2,n)x[sa[i]]=num+=!(y[sa[i]]==y[sa[i-1]]&&(y[sa[i]+k]==y[sa[i-1]+k]));
 		if(num==n)break;m=num;
 	}
+	U(i,1,n)rk[sa[i]]=i;
 }
 
 ```
-## 简要解析
+### 解析
 ```cpp
 U(i,n-k+1,n) y[++num]=i;U(i,1,n)if(sa[i]>k)y[++num]=sa[i]-k;
 ```
@@ -38,3 +45,30 @@ D(i,n,1)sa[c[x[y[i]]]--]=y[i],y[i]=0;
 ```
 **计数排序**的过程。具体地，先将桶 `c` 清空，然后按照第一关键字插入桶中，然后进行一个前缀和的求。
 然后按照第二关键字的排序后的顺序，逆着进行求解。
+
+## Height
+
+### 定义
+`height[i]=lcp(sa[i],sa[i-1])`，
+即**排名**为 `i` 的后缀和**排名**为 `i+1` 的后缀的最长公共前缀长度。
+### 引理
+`height[rk[i]] >= height[rk[i-1]]-1`
+### 证明
+若第 `i` 个后缀为 `cAC`\
+则第 `i+1 ` 个后缀为 `AC`\
+（注：`cA` 表示 `height[rk[i]]` 对应的字符串）\
+则易得第 `rk[i]-1` 个后缀为 `cAB`\
+那么一定有字符串 `AB` 在 `AC` 前。\
+易证。
+
+### Code
+```cpp
+void getH(const char *s,int n) {
+	for(int i(1),j(0);i<=n;++i){
+		if(rk[i]==1) continue;
+		j-=!!j;
+		while(s[i+k]==s[sa[rk[i]-1]+k])++k;
+		height[rk[i]]=k;
+	}
+}
+```
