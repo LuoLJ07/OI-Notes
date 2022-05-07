@@ -82,7 +82,7 @@ void getH(const char *s,int n) {
 ```
 
 ### 应用
-`s[i]` 表示字符串以 `i` 开头的后缀
+`s[i]` 表示字符串以 `i` 开头的后缀\
 `lcp(s[i],s[i+1])=min {height[rk[s[i]] .. rk[s[i+1]]}`
 
 ## Practice
