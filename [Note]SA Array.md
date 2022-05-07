@@ -11,22 +11,29 @@
 `SA[i]:` 表示排名为 `i` 的后缀在原串中的位置\
 `rk[i]:` 表示第 `i` 个后缀的排名
 ```cpp
-int m,sa[N+5],rk[N+5],c[N+5];
-int x[N+5],y[N+5];
+int m,sa[N+5],rk[N+5];
+int x[N+5],y[N+5],c[N+5];
 void getSA(const char *s,int n) {
-	m=255;U(i,1,n) ++c[x[i]=s[i]];U(i,1,m) c[i]+=c[i-1];D(i,n,1) sa[c[x[i]]--]=i;
+	m=255;
+	U(i,1,n) ++c[x[i]=s[i]];
+	U(i,1,m) c[i]+=c[i-1];
+	D(i,n,1) sa[c[x[i]]--]=i;
 	for(int k(1);k<=n;k<<=1) {
 		int num(0);
-		U(i,n-k+1,n) y[++num]=i;U(i,1,n)if(sa[i]>k)y[++num]=sa[i]-k;
-		U(i,1,m)c[i]=0;U(i,1,n)++c[x[i]];U(i,2,m)c[i]+=c[i-1];
-		D(i,n,1)sa[c[x[y[i]]]--]=y[i],y[i]=0;
+		U(i,n-k+1,n) y[++num]=i;
+		U(i,1,n) if(sa[i]>k)
+			y[++num]=sa[i]-k;
+		U(i,0,m) c[i]=0;
+		U(i,1,n) ++c[x[i]];
+		U(i,1,m) c[i]+=c[i-1];
+		D(i,n,1) sa[c[x[y[i]]]--]=y[i],y[i]=0;
 		swap(x,y),x[sa[1]]=1,num=1;
-		U(i,2,n)x[sa[i]]=num+=!(y[sa[i]]==y[sa[i-1]]&&(y[sa[i]+k]==y[sa[i-1]+k]));
-		if(num==n)break;m=num;
+		U(i,2,n) x[sa[i]]=num+=!(y[sa[i-1]]==y[sa[i]]&&y[sa[i-1]+k]==y[sa[i]+k]);
+		if(num==n) break;
+		m=num;
 	}
-	U(i,1,n)rk[sa[i]]=i;
+	U(i,1,n) rk[sa[i]]=i;
 }
-
 ```
 ### 解析
 ```cpp
@@ -63,12 +70,23 @@ D(i,n,1)sa[c[x[y[i]]]--]=y[i],y[i]=0;
 
 ### Code
 ```cpp
+int height[N+5];
 void getH(const char *s,int n) {
 	for(int i(1),j(0);i<=n;++i){
 		if(rk[i]==1) continue;
 		j-=!!j;
-		while(s[i+k]==s[sa[rk[i]-1]+k])++k;
-		height[rk[i]]=k;
+		while(s[i+j]==s[sa[rk[i]-1]+j])++j;
+		height[rk[i]]=j;
 	}
 }
 ```
+
+### 应用
+`s[i]` 表示字符串以 `i` 开头的后缀
+`lcp(s[i],s[i+1])=min {height[rk[s[i]] .. rk[s[i+1]]}`
+
+## Practice
++ [Luogu P4051 [JSOI2007]字符加密](https://www.luogu.com.cn/problem/P4051) 断环为链跑裸SA
++ [Luogu P2870 [USACO07DEC]Best Cow Line](https://www.luogu.com.cn/problem/P2870) 翻转原串加特殊字符加在原串后，跑裸SA
++ [P2852 [USACO06DEC]Milk Patterns G](https://www.luogu.com.cn/problem/P2852) 求height后滑动窗口求定长区间RMQ
++ 未完待续
