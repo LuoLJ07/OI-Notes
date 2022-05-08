@@ -10,27 +10,98 @@
 3. 横叉边（cross edge）：搜索的时候遇到了一个已经访问过的结点，但是这个结点并不是当前结点的祖先。
 4. 前向边（forward edge）：搜索的时候遇到子树中的结点，但非树边。
 
-可以发现当图为无向图有如下重要性质：**搜索树不存在横叉边**。
-
 ## 无向图中的运用
+
+可以发现当图为无向图有如下重要性质：**搜索树不存在横叉边**。
 
 ### 求割边
 >一条边 `(x,y)` 是割边，当且仅当搜索树上 `x` 的一个子节点 `y` 满足 `dfn[x]<low[y]`。
 
 感性理解即为 `y` 被 `x` 更前的点所访问，所以此时 `(x,y)` 为一条割边（即桥）。
 
+```cpp
+int dfn[N+5],low[N+5],cntD;
+bool bridge[M*2+5];
+void tarjan(int u,int pre) {
+    dfn[u]=low[u]=++cntD;
+    for(int i(hd[u]);i;i=e[i].nxt) {
+        int v(e[i].to);
+        if(!dfn[v]) {
+            tarjan(v,i);
+            low[u]=min(low[u],low[v]);
+            if(low[v]>dfn[u])
+                bridge[i]=bridge[i^1]=1;
+        }else if(i!=(pre^1))
+            low[u]=min(low[u],dfn[v]);
+    }
+} 
+```
+
 ### 求割点
 
 进行以下的分类讨论：
 1. 若 `x` 非搜索树的树根，那么它若有一个子节点 `y` 满足 `dfn[x]<=low[y]`，则它是割点。
 2. 若 `x` 为搜索树的树根，如果有超过 `2` 个子节点满足上述条件，那么它也是割点。简单的说，就是有两个儿子。
+```cpp
+int dfn[N+5],low[N+5],cntD;
+bool cut[N+5];
+void tarjan(int u,int root) {
+    dfn[u]=low[u]=++cntD;
+    int cnt(0);
+    for(int i(hd[u]);i;i=e[i].nxt) {
+        int v(e[i].to);
+        if(!dfn[v])  {
+            tarjan(v,root);
+            low[u]=min(low[u],low[v]);
+            if(dfn[u]<=low[v]&&u!=root) cut[u]=1;
+            cnt+=u==root;
+        }else low[u]=min(low[u],dfn[v]);
+    }
+    if(cnt>=2)cut[u]=1;
+}
+```
 
 ### 点双连通分量
-点双内部无割点。
+**点双内部无割点**，但可能包含外部的割点。
+```cpp
+int dfn[N+5],low[N+5],cntD,cnt;
+vector<int>ss[N+5];
+stack<int>st;
+void tarjan(int u,int root) {
+    dfn[u]=low[u]=++cntD;
+    if(u==root&&!hd[u]) {
+        ss[++cnt].push_back(u);
+        return;
+    }
+    st.push(u);
+    for(int i(hd[u]);i;i=e[i].nxt) {
+        int v(e[i].to);
+        if(!dfn[v])  {
+            tarjan(v,root);
+            low[u]=min(low[u],low[v]);
+            if(low[v]>=dfn[u]) 
+                for(ss[++cnt].push_back(u);;) {
+                    int t(st.top());st.pop();
+                    ss[cnt].push_back(t);
+                    if(t==v) break;
+                }
+        }else low[u]=min(low[u],dfn[v]);
+    }
+}
+```
 ### 边双连通分量
 关于边双的缩点，即以每个e-dcc为节点，桥为边建图。
+```cpp
+int col[N+5], dcc;
+void dfs(int u){
+    col[u]=dcc;
+    for (int i(hd[u]);i;i=e[i].nxt) 
+        if (!col[e[i].to]&&!bridge[i])
+            dfs(e[i].to);
+}
+```
 ### 基环树找环
-
+容易发现，即找一个 $u$ 使得有一个 $v$ 与之相连且 `dfn[u]<dfn[v]`。~~简单讲就是搜索~~
 ### 求LCA
 过于冷门且不太实用，还是离线算法。相较之下树剖更为优秀。
 挖个坑溜了。
