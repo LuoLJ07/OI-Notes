@@ -158,4 +158,4 @@ signed main() {
 }
 ```
 #### 多倍经验
-[P1792 [国家集训队]种树](https://www.luogu.com.cn/problem/P1792)
+[Luogu P1792](https://www.luogu.com.cn/problem/P1792)
